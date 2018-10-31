@@ -36,6 +36,21 @@ Resources:
                 Action:
                   - codebuild:*
                 Resource: '*'
+              - Effect: Allow
+                Action: 
+                  - logs:CreateLogStream
+                  - logs:CreateLogGroup
+                  - logs:PutLogEvents
+                Resource: 
+                  - arn:aws:logs:us-east-2:350886378047:log-group:/aws/codebuild/Renwick_Build:log-stream:*
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:ListBucket
+                  - s3:PutObject
+                  - s3:GetBucketPolicy
+                Resource: '*'
         
   PipelineRole:
     Type: AWS::IAM::Role
@@ -63,10 +78,15 @@ Resources:
                   - s3:ListBucket
                   - s3:PutObject
                   - s3:GetBucketPolicy
-                Resource: !GetAtt CodePipelineBucket.Arn
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - codebuild:StartBuild
+                Resource: '*'
   BuildCodeBuild:
       Type: AWS::CodeBuild::Project
       Properties:
+        Name: Renwick_Build
         Description: Bulid renwick
         Artifacts:
             Type: CODEPIPELINE
