@@ -1,0 +1,118 @@
+Parameters:
+  Prefix:
+    Type: String
+    Description: Prefix used to denote stack resources
+  GithubOAuth:
+    Type: String
+    Description: ''
+    NoEcho: true
+Resources:
+  CodePipelineBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${Prefix}-bucket
+      VersioningConfiguration:
+        Status: Enabled
+
+  BuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${Prefix}-build-role
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - Effect: "Allow"
+            Principal: 
+              Service: 
+                - "codebuild.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Policies: 
+        - PolicyName: base
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codebuild:*
+                Resource: '*'
+        
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${Prefix}-pipeline-role
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - Effect: "Allow"
+            Principal: 
+              Service: 
+                - "codepipeline.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Policies: 
+        - PolicyName: base
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:DeleteObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:ListBucket
+                  - s3:PutObject
+                  - s3:GetBucketPolicy
+                Resource: !GetAtt CodePipelineBucket.Arn
+  BuildCodeBuild:
+      Type: AWS::CodeBuild::Project
+      Properties:
+        Description: Bulid renwick
+        Artifacts:
+            Type: CODEPIPELINE
+        Environment:
+            ComputeType: BUILD_GENERAL1_SMALL
+            Image: aws/codebuild/golang:1.10
+            Type: LINUX_CONTAINER
+        ServiceRole: !Ref BuildRole
+        Source:
+            Type: CODEPIPELINE
+            BuildSpec: infrastructure/deploy/buildspec.yaml
+
+  DeploymentPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Sub ${Prefix}-deploy
+      RoleArn: !GetAtt PipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref CodePipelineBucket
+      Stages:
+        - Name: Source
+          Actions:
+              - Name: Source
+                ActionTypeId:
+                  Category: Source
+                  Owner: ThirdParty
+                  Version: 1
+                  Provider: GitHub
+                Configuration:
+                  Owner: Zylox
+                  Repo: renwick
+                  Branch: test
+                  OAuthToken: !Ref GithubOAuth
+                OutputArtifacts:
+                  - Name: github_artifacts
+        - Name: Build
+          Actions:
+            - Name: Build
+              InputArtifacts:
+                - Name: github_artifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref BuildCodeBuild
+            
