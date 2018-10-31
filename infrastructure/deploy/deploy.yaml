@@ -82,6 +82,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - codebuild:StartBuild
+                  - codebuild:BatchGetBuilds
                 Resource: '*'
   BuildCodeBuild:
       Type: AWS::CodeBuild::Project
