@@ -157,13 +157,13 @@ Resources:
                 ProjectName: !Ref BuildCodeBuild
                 PrimarySource: github_artifacts
               OutputArtifacts:
-                - Name: go_artifacts
+                - Name: goartifacts
         - Name: Deploy
           Actions:
             - Name: Deploy
               InputArtifacts:
                 - Name: github_artifacts
-                - Name: go_artifacts
+                - Name: goartifacts
               ActionTypeId:
                 Category: Build
                 Owner: AWS
