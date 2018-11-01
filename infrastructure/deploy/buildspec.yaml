@@ -12,5 +12,5 @@ phases:
 artifacts:
   go_artifacts:
     files:
-      - **/*
+      - '**/*'
     base-directory: go/artifacts
