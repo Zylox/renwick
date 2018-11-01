@@ -1,6 +1,11 @@
 version: 0.2
 phases:
+  install:
+    commands:
+      - go version && go get -u -v golang.org/x/vgo
   build:
     commands:
-    - cd go
-    - make
+      - cd go
+      - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
+      - echo $REPOSITORY_URI
+      - make
