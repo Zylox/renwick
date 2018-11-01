@@ -10,9 +10,5 @@ phases:
       - echo $REPOSITORY_URI
       - make
 artifacts:
-  files: []
-  secondary-artifacts:
-    goartifacts:
-      files:
-        - '**/*'
-      base-directory: go/artifacts
+  files: ['**/*']
+  base-directory: go/artifacts

@@ -92,15 +92,15 @@ Resources:
         Name: Renwick_Build
         Description: Build renwick
         Artifacts:
-            Type: CODEPIPELINE
+          Type: CODEPIPELINE
         Environment:
-            ComputeType: BUILD_GENERAL1_SMALL
-            Image: aws/codebuild/golang:1.10
-            Type: LINUX_CONTAINER
+          ComputeType: BUILD_GENERAL1_SMALL
+          Image: aws/codebuild/golang:1.10
+          Type: LINUX_CONTAINER
         ServiceRole: !Ref BuildRole
         Source:
-            Type: CODEPIPELINE
-            BuildSpec: infrastructure/deploy/buildspec.yaml
+          Type: CODEPIPELINE
+          BuildSpec: infrastructure/deploy/buildspec.yaml
 
   DeployCodeBuild:
       Type: AWS::CodeBuild::Project
