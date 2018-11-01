@@ -43,6 +43,7 @@ Resources:
                   - logs:PutLogEvents
                 Resource: 
                   - arn:aws:logs:us-east-2:350886378047:log-group:/aws/codebuild/Renwick_Build:log-stream:*
+                  - arn:aws:logs:us-east-2:350886378047:log-group:/aws/codebuild/Renwick_Deploy:log-stream:*
               - Effect: Allow
                 Action:
                   - s3:GetObject
