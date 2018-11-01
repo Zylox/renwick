@@ -8,4 +8,4 @@ phases:
       - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
       - echo $CODEBUILD_SOURCE_REPO_URL
       - echo $REPOSITORY_URI
-      - find /
+      

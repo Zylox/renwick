@@ -9,6 +9,7 @@ phases:
       - echo $CODEBUILD_SRC_DIR_github_artifacts
       - echo $REPOSITORY_URI
       - make
+      - find .
 artifacts:
   files: ['**/*']
   base-directory: go/artifacts

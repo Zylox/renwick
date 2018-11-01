@@ -87,37 +87,37 @@ Resources:
                   - codebuild:BatchGetBuilds
                 Resource: '*'
   BuildCodeBuild:
-      Type: AWS::CodeBuild::Project
-      Properties:
-        Name: Renwick_Build
-        Description: Build renwick
-        Artifacts:
-          Type: CODEPIPELINE
-        Environment:
-          ComputeType: BUILD_GENERAL1_SMALL
-          Image: aws/codebuild/golang:1.10
-          Type: LINUX_CONTAINER
-        ServiceRole: !Ref BuildRole
-        Source:
-          Type: CODEPIPELINE
-          BuildSpec: infrastructure/deploy/buildspec.yaml
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: Renwick_Build
+      Description: Build renwick
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/golang:1.10
+        Type: LINUX_CONTAINER
+      ServiceRole: !Ref BuildRole
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: infrastructure/deploy/buildspec.yaml
 
   DeployCodeBuild:
-      Type: AWS::CodeBuild::Project
-      Properties:
-        Name: Renwick_Deploy
-        Description: Deploy renwick
-        Source:
-            Type: CODEPIPELINE
-            BuildSpec: infrastructure/deploy/deployspec.yaml
-        Artifacts:
-            Type: CODEPIPELINE
-        Environment:
-            ComputeType: BUILD_GENERAL1_SMALL
-            Image: aws/codebuild/golang:1.10
-            Type: LINUX_CONTAINER
-        ServiceRole: !Ref BuildRole
-       
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: Renwick_Deploy
+      Description: Deploy renwick
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: infrastructure/deploy/deployspec.yaml
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/golang:1.10
+        Type: LINUX_CONTAINER
+      ServiceRole: !Ref BuildRole
+      
 
   DeploymentPipeline:
     Type: AWS::CodePipeline::Pipeline
