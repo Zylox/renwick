@@ -6,6 +6,11 @@ phases:
   build:
     commands:
       - cd go
-      - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
+      - echo $CODEBUILD_SRC_DIR_github_artifacts
       - echo $REPOSITORY_URI
       - make
+artifacts:
+  secondary-artifacts:
+    go_artifacts:
+      files:
+        - go/artifacts/**/*

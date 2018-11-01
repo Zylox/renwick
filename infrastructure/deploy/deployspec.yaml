@@ -1,0 +1,11 @@
+version: 0.2
+phases:
+  build:
+    commands:
+      - cd go
+      - echo $CODEBUILD_SRC_DIR_github_artifacts
+      - echo $CODEBUILD_SRC_DIR_go_artifacts
+      - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
+      - echo $CODEBUILD_SOURCE_REPO_URL
+      - echo $REPOSITORY_URI
+      - find /

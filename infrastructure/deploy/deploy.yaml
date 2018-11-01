@@ -88,7 +88,7 @@ Resources:
       Type: AWS::CodeBuild::Project
       Properties:
         Name: Renwick_Build
-        Description: Bulid renwick
+        Description: Build renwick
         Artifacts:
             Type: CODEPIPELINE
         Environment:
@@ -99,6 +99,23 @@ Resources:
         Source:
             Type: CODEPIPELINE
             BuildSpec: infrastructure/deploy/buildspec.yaml
+
+  DeployCodeBuild:
+      Type: AWS::CodeBuild::Project
+      Properties:
+        Name: Renwick_Deploy
+        Description: Deploy renwick
+        Source:
+            Type: CODEPIPELINE
+            BuildSpec: infrastructure/deploy/deployspec.yaml
+        Artifacts:
+            Type: CODEPIPELINE
+        Environment:
+            ComputeType: BUILD_GENERAL1_SMALL
+            Image: aws/codebuild/golang:1.10
+            Type: LINUX_CONTAINER
+        ServiceRole: !Ref BuildRole
+       
 
   DeploymentPipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -126,7 +143,7 @@ Resources:
                   - Name: github_artifacts
         - Name: Build
           Actions:
-            - Name: Build
+            - Name: Build_go
               InputArtifacts:
                 - Name: github_artifacts
               ActionTypeId:
@@ -136,4 +153,21 @@ Resources:
                 Provider: CodeBuild
               Configuration:
                 ProjectName: !Ref BuildCodeBuild
+                PrimarySource: github_artifacts
+              OutputArtifacts:
+                - Name: go_artifacts
+        - Name: Deploy
+          Actions:
+            - Name: Deploy
+              InputArtifacts:
+                - Name: github_artifacts
+                - Name: go_artifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref DeployCodebuild
+                PrimarySource: github_artifacts
             
