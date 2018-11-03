@@ -18,4 +18,4 @@ echo "seriously wtf"
 aws cloudformation deploy \
     --template-file renwick_gen.yaml \
     --stack-name renwick \
-    --capabilities CAPABILITY_IAM
+    --capabilities CAPABILITY_NAMED_IAM
