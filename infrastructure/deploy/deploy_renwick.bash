@@ -15,8 +15,6 @@ aws cloudformation package \
 
 echo "seriously wtf"
 
-cat renwick_gen.yaml
-
 aws cloudformation deploy \
     --template-file renwick_gen.yaml \
     --stack-name renwick \

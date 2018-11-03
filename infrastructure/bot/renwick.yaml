@@ -13,5 +13,6 @@ Resources:
       Events:
         SlackApi:
           Type: Api
-          Properties: slack_event
-          Method: POST
+          Properties: 
+            Path: /slack_event
+            Method: POST
