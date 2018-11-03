@@ -1,15 +1,14 @@
 Transform: 'AWS::Serverless-2016-10-31'
-Parameters:
-  CodeBucket:
-    Type: String
-    Description: Bucket uri that code lives in.
 Resources:
   Dispatch:
-    Type: AWS::Serverless::Fucntion
+    Type: AWS::Serverless::Function
     Properties:
       Handler: lambda
       Runtime: go1.x
-      CodeUri: !Sub ${CodeBucket}/artifacts/cmd/dispatch/lambda
+      CodeUri: ~/goarts/artifacts/cmd/dispatch/lambda
+      Environment:
+        Variables:
+            SLACK_OAUTH: renwick/slack/oauth
       Events:
         SlackApi:
           Type: Api

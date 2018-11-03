@@ -2,10 +2,5 @@ version: 0.2
 phases:
   build:
     commands:
-      - cd go
-      - echo $CODEBUILD_SRC_DIR_github_artifacts
-      - echo $CODEBUILD_SRC_DIR_goartifacts
-      - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
-      - echo $CODEBUILD_SOURCE_REPO_URL
-      - echo $REPOSITORY_URI
+      - bash -e infrastructure/deploy/deploy_renwick.bash
       
