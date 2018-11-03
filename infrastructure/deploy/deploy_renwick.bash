@@ -8,7 +8,7 @@ bucket=$(aws cloudformation describe-stacks --stack-name $CODEPIPELINE_STACK_NAM
 echo "Bucket: $bucket"
 
 aws cloudformation package \
-    --template-file ../bot/renwick.yaml \
+    --template-file infrastructure/bot/renwick.yaml \
     --s3-bucket $bucket
     --output yaml > renwick_gen.yaml
 
