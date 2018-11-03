@@ -9,8 +9,10 @@ echo "Bucket: $bucket"
 
 aws cloudformation package \
     --template-file infrastructure/bot/renwick.yaml \
-    --s3-bucket $bucket 
-    
+    --s3-bucket $bucket \
+    --output json > renwick_gen.yaml
+
+echo "seriously wtf"
 
 cat renwick_gen.yaml
 
