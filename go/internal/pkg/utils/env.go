@@ -3,7 +3,7 @@ package utils
 import (
 	"os"
 
-	"github.com/renwick/go/internal/pkg/log"
+	"github.com/zylox/renwick/go/internal/pkg/log"
 )
 
 func MustGetEnv(envKey string) string {

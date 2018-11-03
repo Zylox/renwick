@@ -1,7 +1,7 @@
 package secrets
 
 import (
-	"github.com/renwick/go/internal/pkg/log"
+	"github.com/zylox/renwick/go/internal/pkg/log"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"

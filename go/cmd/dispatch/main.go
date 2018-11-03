@@ -1,17 +1,17 @@
 package main
 
 import (
-	"github.com/renwick/go/internal/pkg/log"
-	"github.com/renwick/go/internal/pkg/utils"
-	"github.com/renwick/go/internal/pkg/slack"
-	
-	"github.com/renwick/go/internal/pkg/aws/secrets"
-	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/zylox/renwick/go/internal/pkg/log"
+	"github.com/zylox/renwick/go/internal/pkg/slack"
+	"github.com/zylox/renwick/go/internal/pkg/utils"
+
 	"context"
-	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-lambda-go/events"
 	"net/http"
-	
+
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/zylox/renwick/go/internal/pkg/aws/secrets"
 	// "github.com/nlopes/slack"
 )
 
@@ -23,12 +23,11 @@ func bootStrapHandler() GatewayProxyFn {
 	}
 }
 
-
 func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	log.InfoF("Message: %+v", gatewayEvent)
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body: "Pong",
+		Body:       "Pong",
 	}, nil
 }
 
