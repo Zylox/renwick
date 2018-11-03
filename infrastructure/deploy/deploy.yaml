@@ -57,6 +57,25 @@ Resources:
                 Action:
                   - cloudformation:*
                 Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:CreateRole
+                  - iam:DeleteRole
+                  - iam:GetRole
+                  - iam:UpdateRole
+                  - iam:AttachRolePolicy
+                  - iam:DetachRolePolicy
+                  - iam:PassRole
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - lambda:*
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - apigateway:*
+                Resource: '*'
+                
         
   PipelineRole:
     Type: AWS::IAM::Role
