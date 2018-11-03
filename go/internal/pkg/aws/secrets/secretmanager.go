@@ -1,12 +1,11 @@
 package secrets
 
 import (
-	"github.com/zylox/renwick/go/internal/renwick/log"
-	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"github.com/zylox/renwick/go/internal/pkg/log"
 )
-
 
 func GetSecret(sess *session.Session, secretID string) *string {
 	sm := secretsmanager.New(sess)
