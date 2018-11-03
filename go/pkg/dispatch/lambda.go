@@ -40,7 +40,7 @@ func bootStrapHandler(oauthKey slack.SlackOauth) GatewayProxyFn {
 func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest, oauthKey slack.SlackOauth) (events.APIGatewayProxyResponse, error) {
 	// api := nslack.New(oauthKey.BotKey())
 
-	eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(gatewayEvent.Body))
+	eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(gatewayEvent.Body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: oauthKey.BotKey()}))
 
 	if err != nil {
 		log.ErrorF("Failed to parse slack event: %+v", err)
