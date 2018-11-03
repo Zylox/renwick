@@ -10,7 +10,9 @@ echo "Bucket: $bucket"
 aws cloudformation package \
     --template-file infrastructure/bot/renwick.yaml \
     --s3-bucket $bucket \
-    --output yaml > renwick_gen.yaml
+    --output json > renwick_gen.yaml
+
+cat renwick_gen.yaml
 
 aws cloudformation deploy \
     --template-file renwick_gen.yaml \
