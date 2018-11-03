@@ -46,6 +46,8 @@ func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyReque
 		log.ErrorF("Failed to parse slack event: %+v", err)
 	}
 
+	log.InfoF("WTF: %+v", eventsAPIEvent)
+
 	if eventsAPIEvent.Type == slackevents.URLVerification {
 		var r *slackevents.ChallengeResponse
 		err := json.Unmarshal([]byte(gatewayEvent.Body), &r)
