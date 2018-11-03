@@ -1,10 +1,35 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Resources:
+  GeneralLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+        RoleName: GeneralLambdaRole
+        AssumeableRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement: 
+            - Effect: "Allow"
+              Principal: 
+                Service: 
+                  - "lambda.amazonaws.com"
+              Action: 
+                - "sts:AssumeRole"
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        Policies:
+          - PolicyName: get-secrets
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - secretsmanager:GetSecretValue
+                  Resource: '*'
   Dispatch:
     Type: AWS::Serverless::Function
     Properties:
       Handler: lambda
+      RoleArn: !GetAtt GeneralLambdaRole.Arn
       Runtime: go1.x
       CodeUri: ./goarts/cmd/renwick/dispatch #../../go/artifacts/cmd/dispatch/lambda
       Environment:
