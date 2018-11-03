@@ -10,3 +10,8 @@ Resources:
       Handler: lambda
       Runtime: go1.x
       CodeUri: !Sub ${CodeBucket}/artifacts/cmd/dispatch/lambda
+      Events:
+        SlackApi:
+          Type: Api
+          Properties: slack_event
+          Method: POST
