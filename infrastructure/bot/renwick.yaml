@@ -5,7 +5,7 @@ Resources:
     Properties:
       Handler: lambda
       Runtime: go1.x
-      CodeUri: ./goarts/artifacts/cmd/dispatch/lambda
+      CodeUri: ../goarts/artifacts/cmd/dispatch/lambda
       Environment:
         Variables:
             SLACK_OAUTH: renwick/slack/oauth
