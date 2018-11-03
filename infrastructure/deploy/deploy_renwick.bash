@@ -1,4 +1,7 @@
 
+echo $CODEBUILD_SRC_DIR_goartifacts
+find .
+
 
 find  $CODEBUILD_SRC_DIR_goartifacts
 cp -a $CODEBUILD_SRC_DIR_goartifacts/. infrastructure/bot/goarts/
