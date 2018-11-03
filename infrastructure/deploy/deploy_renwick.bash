@@ -3,7 +3,9 @@
 
 cp -a $CODEBUILD_SRC_DIR_goartifacts/. ~/goarts/
 
-bucket=$(aws cloudformation describe-stacks --stack-name $CODEPIPELINE_STACK_NAME --query 'Stacks[0].Outputs[?OutputKey==`CodePipelineBucket`].OutputValue' --output text)
+bucket=$(aws cloudformation describe-stacks --stack-name $CODEPIPELINE_STACK_NAME --query 'Stacks[0].Outputs[?OutputKey==`CodeBucket`].OutputValue' --output text)
+
+echo "Bucket: $bucket"
 
 aws cloudformation package \
     --template-file ../bot/renwick.yaml \
