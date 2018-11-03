@@ -1,8 +1,8 @@
 
 
-
+find  $CODEBUILD_SRC_DIR_goartifacts
 cp -a $CODEBUILD_SRC_DIR_goartifacts/. infrastructure/bot/goarts/
-
+find infrastructure/bot/goarts/
 bucket=$(aws cloudformation describe-stacks --stack-name $CODEPIPELINE_STACK_NAME --query 'Stacks[0].Outputs[?OutputKey==`CodeBucket`].OutputValue' --output text)
 
 echo "Bucket: $bucket"
