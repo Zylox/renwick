@@ -26,21 +26,27 @@ func Create() {
 	}
 
 	slackOauthSecretKey := utils.MustGetEnv(slack.OauthSecretsEnvKey)
-	oauthKey := slack.BasicSlackOauth{Key: secrets.MustGetSecret(awsSession, slackOauthSecretKey)}
+	oauthKey := slack.BasicSlackOauth{}
+	json.Unmarshal([]byte(secrets.MustGetSecret(awsSession, slackOauthSecretKey)), oauthKey)
 	log.InfoF("dont look: %s", oauthKey)
 	lambda.Start(bootStrapHandler(oauthKey))
 }
 
-func bootStrapHandler(oauthKey slack.SlackOauth) GatewayProxyFn {
+func bootStrapHandler(oauthKey slack.SlackToken) GatewayProxyFn {
 	return func(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		return HandleRequest(ctx, gatewayEvent, oauthKey)
 	}
 }
 
-func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest, oauthKey slack.SlackOauth) (events.APIGatewayProxyResponse, error) {
+func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest, oauthKey slack.SlackToken) (events.APIGatewayProxyResponse, error) {
 	// api := nslack.New(oauthKey.BotKey())
 
-	eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(gatewayEvent.Body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: oauthKey.BotKey()}))
+	eventsAPIEvent, err := slackevents.ParseEvent(
+		json.RawMessage(gatewayEvent.Body),
+		slackevents.OptionVerifyToken(
+			&slackevents.TokenComparator{VerificationToken: oauthKey.VerificationToken()},
+		),
+	)
 
 	if err != nil {
 		log.ErrorF("Failed to parse slack event: %+v", err)
