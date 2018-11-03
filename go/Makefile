@@ -1,6 +1,6 @@
 
 
-LAMBDAS = $(sort $(dir $(wildcard cmd/*/)))
+LAMBDAS = $(sort $(dir $(wildcard cmd/renwick/*/)))
 BUILD_DIR=artifacts
 
 

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/zylox/renwick/go/internal/pkg/log"
-	"github.com/zylox/renwick/go/internal/pkg/slack"
-	"github.com/zylox/renwick/go/internal/pkg/utils"
+	"github.com/zylox/renwick/go/internal/renwick/log"
+	"github.com/zylox/renwick/go/internal/renwick/slack"
+	"github.com/zylox/renwick/go/internal/renwick/utils"
 
 	"context"
 	"net/http"
@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/zylox/renwick/go/internal/pkg/aws/secrets"
+	"github.com/zylox/renwick/go/internal/renwick/aws/secrets"
 	// "github.com/nlopes/slack"
 )
 
