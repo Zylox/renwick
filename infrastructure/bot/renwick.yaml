@@ -29,7 +29,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: lambda
-      RoleArn: !GetAtt GeneralLambdaRole.Arn
+      Role: !GetAtt GeneralLambdaRole.Arn
       Runtime: go1.x
       CodeUri: ./goarts/cmd/renwick/dispatch #../../go/artifacts/cmd/dispatch/lambda
       Environment:
