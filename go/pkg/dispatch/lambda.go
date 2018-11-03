@@ -1,24 +1,25 @@
 package dispatch
 
 import (
-	"github.com/zylox/renwick/go/internal/pkg/slack"
-	"github.com/zylox/renwick/go/internal/pkg/aws/secrets"
-	"github.com/zylox/renwick/go/internal/pkg/utils"
-	"github.com/zylox/renwick/go/internal/pkg/log"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/zylox/renwick/go/internal/pkg/aws/secrets"
+	"github.com/zylox/renwick/go/internal/pkg/log"
+	"github.com/zylox/renwick/go/internal/pkg/slack"
+	"github.com/zylox/renwick/go/internal/pkg/utils"
 
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	// "github.com/nlopes/slack"
+	"github.com/nlopes/slack/slackevents"
 )
 
 type GatewayProxyFn func(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)
 
 func Create() {
-	
+
 	awsSession, err := session.NewSession()
 	if err != nil {
 		log.FatalF("dispatch.Main - Failed to init aws session. Err: %+v", err)
@@ -37,6 +38,26 @@ func bootStrapHandler() GatewayProxyFn {
 }
 
 func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// api := nslack.New("fake")
+
+	eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(gatewayEvent.Body))
+
+	if err != nil {
+		panic("WAAAAAA")
+	}
+
+	if eventsAPIEvent.Type == slackevents.URLVerification {
+		var r *slackevents.ChallengeResponse
+		err := json.Unmarshal([]byte(gatewayEvent.Body), &r)
+		if err != nil {
+			panic("RUH ROH")
+		}
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusOK,
+			Body:       r.Challenge,
+		}, nil
+	}
+
 	log.InfoF("Message: %+v", gatewayEvent)
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
