@@ -6,6 +6,11 @@ import (
 	"github.com/zylox/renwick/go/pkg/log"
 )
 
+type Secret interface {
+	GetSecret() *string
+	MustGetSecret() string
+}
+
 func MustGetEnv(envKey string) string {
 	val := os.Getenv(envKey)
 	if val == "" {

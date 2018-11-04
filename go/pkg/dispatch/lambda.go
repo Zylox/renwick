@@ -2,9 +2,7 @@ package dispatch
 
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
-	nslack "github.com/nlopes/slack"
 	"github.com/zylox/renwick/go/pkg/aws/secrets"
-	"github.com/zylox/renwick/go/pkg/cleverbot"
 	"github.com/zylox/renwick/go/pkg/dice"
 	"github.com/zylox/renwick/go/pkg/log"
 	"github.com/zylox/renwick/go/pkg/slack"
@@ -37,15 +35,11 @@ func Create() {
 		log.FatalF("dispatch.Main - Failed to init aws session. Err: %+v", err)
 	}
 
-	slackOauthSecretKey := utils.MustGetEnv(slack.OauthSecretsEnvKey)
-	oauthKey := slack.BasicSlackOauth{}
-	json.Unmarshal([]byte(secrets.MustGetSecret(awsSession, slackOauthSecretKey)), &oauthKey)
-
-	if cbsek := utils.GetEnv(cleverbot.CleverbotSecretEnvKey); cbsek != "" {
-		cleverBotKey := secrets.MustGetSecret(awsSession, cbsek)
-		fallbackHandler = cleverbot.NewCalbackHandler(cleverBotKey)
-	}
-
+	slackOauthSecret := secrets.NewLazySecret(
+		awsSession,
+		utils.MustGetEnv(slack.OauthSecretsEnvKey),
+	)
+	oauthKey := slack.NewLazySlackOauth(slackOauthSecret)
 	lambda.Start(bootStrapHandler(oauthKey))
 }
 
@@ -64,7 +58,7 @@ func bootStrapHandler(oauthKey slack.SlackToken) GatewayProxyFn {
 	}
 }
 
-func HandleSlackCallback(client *nslack.Client, event slackevents.EventsAPIEvent, authedUsers []string) {
+func HandleSlackCallback(clientContainer slack.ClientContainer, event slackevents.EventsAPIEvent, authedUsers []string) {
 	botID := slack.UserID{ID: authedUsers[0]}
 	innerEvent := event.InnerEvent
 	switch ev := innerEvent.Data.(type) {
@@ -78,14 +72,14 @@ func HandleSlackCallback(client *nslack.Client, event slackevents.EventsAPIEvent
 
 		handledAtleastOnce := false
 		for _, handler := range appMentionCallBackHandlers {
-			if handler.Is(client, same) {
+			if handler.Is(clientContainer, same) {
 				handledAtleastOnce = true
-				handler.Act(client, same)
+				handler.Act(clientContainer, same)
 			}
 		}
 		if !handledAtleastOnce && fallbackHandler != nil {
 			log.InfoF("HandleSlackCallback - entering fallback callback")
-			fallbackHandler.Act(client, same)
+			fallbackHandler.Act(clientContainer, same)
 		}
 
 		// triggeringUser, err := client.GetUserInfo(ev.User)
@@ -101,7 +95,8 @@ func HandleSlackCallback(client *nslack.Client, event slackevents.EventsAPIEvent
 }
 
 func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest, oauthKey slack.SlackToken) (events.APIGatewayProxyResponse, error) {
-	client := nslack.New(oauthKey.BotOauthKey())
+	//client := nslack.New(oauthKey.BotOauthKey())
+	clientContainer := slack.NewClientContainer(oauthKey)
 	rawE := json.RawMessage(gatewayEvent.Body)
 	eventsAPIEvent, err := slackevents.ParseEvent(
 		rawE,
@@ -137,7 +132,7 @@ func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyReque
 		if err != nil {
 			log.ErrorF("Failed to parse slack Outer event to get users: %+v", err)
 		}
-		HandleSlackCallback(client, eventsAPIEvent, cbEvent.AuthedUsers)
+		HandleSlackCallback(clientContainer, eventsAPIEvent, cbEvent.AuthedUsers)
 	}
 
 	log.InfoF("Message: %+v", gatewayEvent)

@@ -19,13 +19,14 @@ const DiceRollCommandString = "roll me"
 
 type DiceRoller struct{}
 
-func (d DiceRoller) Is(_ *nslack.Client, event slack.SlackAppMessageEvent) bool {
+func (d DiceRoller) Is(_ slack.ClientContainer, event slack.SlackAppMessageEvent) bool {
 	msg := slack.ParseSimpleCommand(event.BotID, event.Text)
 	return msg != "" && strings.HasPrefix(strings.ToLower(msg), DiceRollCommandString)
 }
 
-func (d DiceRoller) Act(client *nslack.Client, event slack.SlackAppMessageEvent) error {
+func (d DiceRoller) Act(clientContainer slack.ClientContainer, event slack.SlackAppMessageEvent) error {
 	rand.Seed(time.Now().UTC().UnixNano())
+	client := clientContainer.GetClient()
 	msg := slack.ParseSimpleCommand(event.BotID, event.Text)
 	trimmedMsg := strings.TrimSpace(strings.TrimPrefix(msg, DiceRollCommandString))
 	result, reason, err := dice.Roll(trimmedMsg)
