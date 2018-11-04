@@ -115,6 +115,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:d97004d33f915a6b39bc8557b2c9d3c0a477c2014d4c9b820cd23bd2ce8fac32"
+  name = "github.com/ugjka/cleverbot-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "492a9d05bb68e0676e0ed9483dcbe0b62340b773"
+
+[[projects]]
+  branch = "master"
   digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -145,6 +153,7 @@
     "github.com/nlopes/slack",
     "github.com/nlopes/slack/slackevents",
     "github.com/sirupsen/logrus",
+    "github.com/ugjka/cleverbot-go",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

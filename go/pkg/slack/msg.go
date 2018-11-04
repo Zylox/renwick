@@ -25,6 +25,10 @@ func DetectUsers(msg string) []UserID {
 	return userIDs
 }
 
+func UserResponse(userID UserID, msg string) string {
+	return userID.ToLiteral() + ` ` + msg
+}
+
 func StripUserOnce(userID UserID, msg string) string {
 	return strings.Replace(msg, userID.ToLiteral(), "", 1)
 }

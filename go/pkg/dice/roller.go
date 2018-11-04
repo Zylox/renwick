@@ -1,7 +1,9 @@
 package dice
 
 import (
+	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/justinian/dice"
 	nslack "github.com/nlopes/slack"
@@ -23,6 +25,7 @@ func (d DiceRoller) Is(_ *nslack.Client, event slack.SlackAppMessageEvent) bool 
 }
 
 func (d DiceRoller) Act(client *nslack.Client, event slack.SlackAppMessageEvent) error {
+	rand.Seed(time.Now().UTC().UnixNano())
 	msg := slack.ParseSimpleCommand(event.BotID, event.Text)
 	trimmedMsg := strings.TrimSpace(strings.TrimPrefix(msg, DiceRollCommandString))
 	result, reason, err := dice.Roll(trimmedMsg)

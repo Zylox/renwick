@@ -13,3 +13,7 @@ func MustGetEnv(envKey string) string {
 	}
 	return val
 }
+
+func GetEnv(envKey string) string {
+	return os.Getenv(envKey)
+}

@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	nslack "github.com/nlopes/slack"
 	"github.com/zylox/renwick/go/pkg/aws/secrets"
+	"github.com/zylox/renwick/go/pkg/cleverbot"
 	"github.com/zylox/renwick/go/pkg/dice"
 	"github.com/zylox/renwick/go/pkg/log"
 	"github.com/zylox/renwick/go/pkg/slack"
@@ -19,6 +20,7 @@ import (
 )
 
 var appMentionCallBackHandlers []slack.SlackAppMessageEventHandler
+var fallbackHandler slack.SlackAppMessageEventHandler
 
 func init() {
 	appMentionCallBackHandlers = append(
@@ -30,7 +32,6 @@ func init() {
 type GatewayProxyFn func(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)
 
 func Create() {
-
 	awsSession, err := session.NewSession()
 	if err != nil {
 		log.FatalF("dispatch.Main - Failed to init aws session. Err: %+v", err)
@@ -40,6 +41,12 @@ func Create() {
 	oauthKey := slack.BasicSlackOauth{}
 	json.Unmarshal([]byte(secrets.MustGetSecret(awsSession, slackOauthSecretKey)), &oauthKey)
 	log.InfoF("dont look: %s %s", oauthKey, secrets.MustGetSecret(awsSession, slackOauthSecretKey))
+
+	if cbsek := utils.GetEnv(cleverbot.CleverbotSecretEnvKey); cbsek != "" {
+		cleverBotKey := secrets.MustGetSecret(awsSession, cbsek)
+		fallbackHandler = cleverbot.NewCalbackHandler(cleverBotKey)
+	}
+
 	lambda.Start(bootStrapHandler(oauthKey))
 }
 
@@ -70,10 +77,15 @@ func HandleSlackCallback(client *nslack.Client, event slackevents.EventsAPIEvent
 			TeamID:          event.TeamID,
 		}
 
+		handledAtleastOnce := false
 		for _, handler := range appMentionCallBackHandlers {
 			if handler.Is(client, same) {
+				handledAtleastOnce = true
 				handler.Act(client, same)
 			}
+		}
+		if !handledAtleastOnce && fallbackHandler != nil {
+			fallbackHandler.Act(client, same)
 		}
 
 		// triggeringUser, err := client.GetUserInfo(ev.User)
