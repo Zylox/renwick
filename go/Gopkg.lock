@@ -152,6 +152,7 @@
     "github.com/justinian/dice",
     "github.com/nlopes/slack",
     "github.com/nlopes/slack/slackevents",
+    "github.com/nlopes/slack/slackutilsx",
     "github.com/sirupsen/logrus",
     "github.com/ugjka/cleverbot-go",
   ]

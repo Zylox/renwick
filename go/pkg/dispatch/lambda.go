@@ -121,6 +121,16 @@ func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyReque
 			Body:       Challenge(gatewayEvent),
 		}, nil
 	} else if eventsAPIEvent.Type == slackevents.CallbackEvent {
+		// Don't retry, likely caused by lambda warmup
+		if reason, ok := gatewayEvent.Headers["X-Slack-Retry-Reason"]; ok && reason == "http_timeout" {
+			headers := make(map[string]string)
+			headers["X-Slack-No-Retry"] = "1"
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusNoContent,
+				Body:       "Stop it",
+				Headers:    headers,
+			}, nil
+		}
 		cbEvent := &slackevents.EventsAPICallbackEvent{}
 		err = json.Unmarshal(rawE, cbEvent)
 		if err != nil {
