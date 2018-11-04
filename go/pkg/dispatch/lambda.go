@@ -57,6 +57,7 @@ func HandleSlackCallback(client *nslack.Client, event slackevents.EventsAPIEvent
 		triggeringUser, err := client.GetUserProfile(ev.User, false)
 		var response string
 		if err != nil {
+			log.ErrorF("dispatch.HandleSlackCallback.AppMention - Could not lookup user name. Err: %+v", err)
 			response = "Strange...i can't figure out who you are"
 		} else {
 			response = fmt.Sprintf("Go away %s", triggeringUser.DisplayName)
