@@ -36,6 +36,7 @@ Resources:
       Environment:
         Variables:
             SLACK_OAUTH: renwick/slack/oauth
+            CLEVERBOT_KEY: renwick/cleverbot/apikey
       Events:
         SlackApi:
           Type: Api
