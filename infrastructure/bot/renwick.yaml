@@ -71,6 +71,9 @@ Resources:
         Variables:
             SLACK_OAUTH: renwick/slack/oauth
             CLEVERBOT_KEY: renwick/cleverbot/apikey
+            ATTENTIVENESS: 0
+            TALKATIVENESS: 0
+            WACKINESS: 0
       Events:
         CleverbotEvent:
           Type: SNS

@@ -14,6 +14,9 @@ import (
 )
 
 const CleverbotArnKey = "CLEVERBOT_ARN"
+const AttentivenessKey = "ATTENTIVENESS"
+const TalkativenessKey = "TALKATIVENESS"
+const WackinessKey = "WACKINESS"
 
 func Create() {
 	awsSession, err := session.NewSession()
@@ -28,7 +31,7 @@ func Create() {
 
 	cbsek := utils.MustGetEnv(CleverbotSecretEnvKey)
 	cleverBotSecret := secrets.NewLazySecret(awsSession, cbsek)
-	chatter := NewBotChatter(cleverBotSecret)
+	chatter := NewBotChatter(cleverBotSecret, nil)
 
 	oauthKey := slack.NewLazySlackOauth(slackOauthSecret)
 	clientContainer := slack.NewClientContainer(oauthKey)

@@ -2,6 +2,7 @@ package cleverbot
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -18,8 +19,15 @@ const CleverbotSecretEnvKey = "CLEVERBOT_KEY"
 
 var messagePostParameters nslack.PostMessageParameters
 
+type CleverbotConfig struct {
+	Attentiveness uint8
+	Talkativeness uint8
+	Wackiness     uint8
+}
+
 type BotChatter struct {
 	secret   utils.Secret
+	config   CleverbotConfig
 	sessions map[string]*cleverbot.Session
 }
 
@@ -33,9 +41,27 @@ func init() {
 	messagePostParameters.EscapeText = false
 }
 
-func NewBotChatter(secret utils.Secret) *BotChatter {
+func getConfigForKey(key string) uint8 {
+	s := utils.GetEnv(key)
+	if s == "" {
+		return 255
+	} else {
+		v, _ := strconv.Atoi(s)
+		return uint8(v)
+	}
+}
+
+func NewBotChatter(secret utils.Secret, config *CleverbotConfig) *BotChatter {
+	if config == nil {
+		config = &CleverbotConfig{
+			Attentiveness: getConfigForKey(AttentivenessKey),
+			Talkativeness: getConfigForKey(TalkativenessKey),
+			Wackiness:     getConfigForKey(WackinessKey),
+		}
+	}
 	return &BotChatter{
 		secret:   secret,
+		config:   *config,
 		sessions: make(map[string]*cleverbot.Session),
 	}
 }
@@ -50,6 +76,16 @@ func NewCalbackHandler(awsSession *session.Session, topicArn string) slack.Slack
 func (chatter *BotChatter) GetUserSession(userID slack.UserID) *cleverbot.Session {
 	if session, ok := chatter.sessions[userID.ID]; ok {
 		return session
+	}
+	session := cleverbot.New(chatter.secret.MustGetSecret())
+	if chatter.config.Talkativeness != 255 {
+		session.Talkativeness(chatter.config.Talkativeness)
+	}
+	if chatter.config.Attentiveness != 255 {
+		session.Attentiveness(chatter.config.Attentiveness)
+	}
+	if chatter.config.Wackiness != 255 {
+		session.Wackiness(chatter.config.Wackiness)
 	}
 	chatter.sessions[userID.ID] = cleverbot.New(chatter.secret.MustGetSecret())
 	return chatter.sessions[userID.ID]
