@@ -1,6 +1,8 @@
 package dispatch
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws/session"
 	nslack "github.com/nlopes/slack"
 	"github.com/zylox/renwick/go/internal/pkg/aws/secrets"
@@ -33,44 +35,57 @@ func Create() {
 	lambda.Start(bootStrapHandler(oauthKey))
 }
 
+func Challenge(gatewayEvent events.APIGatewayProxyRequest) string {
+	var r *slackevents.ChallengeResponse
+	err := json.Unmarshal([]byte(gatewayEvent.Body), &r)
+	if err != nil {
+		log.ErrorF("Failed to unmarshal slack event: %+v", err)
+	}
+	return r.Challenge
+}
+
 func bootStrapHandler(oauthKey slack.SlackToken) GatewayProxyFn {
 	return func(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		return HandleRequest(ctx, gatewayEvent, oauthKey)
 	}
 }
 
-func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest, oauthKey slack.SlackToken) (events.APIGatewayProxyResponse, error) {
-	api := nslack.New(oauthKey.BotOauthKey())
+func HandleSlackCallback(client *nslack.Client, event slackevents.EventsAPIEvent) {
+	innerEvent := event.InnerEvent
+	switch ev := innerEvent.Data.(type) {
+	case *slackevents.AppMentionEvent:
+		triggeringUser, err := client.GetUserProfile(ev.User, false)
+		var response string
+		if err != nil {
+			response = "Strange...i can't figure out who you are"
+		} else {
+			response = fmt.Sprintf("Go away %s", triggeringUser.DisplayName)
+		}
+		client.PostMessage(ev.Channel, response, nslack.NewPostMessageParameters())
+	}
+}
 
+func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest, oauthKey slack.SlackToken) (events.APIGatewayProxyResponse, error) {
+	client := nslack.New(oauthKey.BotOauthKey())
 	eventsAPIEvent, err := slackevents.ParseEvent(
 		json.RawMessage(gatewayEvent.Body),
 		slackevents.OptionVerifyToken(
 			&slackevents.TokenComparator{VerificationToken: oauthKey.VerificationToken()},
 		),
 	)
-
 	if err != nil {
 		log.ErrorF("Failed to parse slack event: %+v", err)
 	}
 
-	log.InfoF("WTF: %+v", eventsAPIEvent)
+	log.InfoF("Event: %+v", eventsAPIEvent)
 
 	if eventsAPIEvent.Type == slackevents.URLVerification {
-		var r *slackevents.ChallengeResponse
-		err := json.Unmarshal([]byte(gatewayEvent.Body), &r)
-		if err != nil {
-			log.ErrorF("Failed to unmarshal slack event: %+v", err)
-		}
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusOK,
-			Body:       r.Challenge,
+			Body:       Challenge(gatewayEvent),
 		}, nil
 	} else if eventsAPIEvent.Type == slackevents.CallbackEvent {
-		innerEvent := eventsAPIEvent.InnerEvent
-		switch ev := innerEvent.Data.(type) {
-		case *slackevents.AppMentionEvent:
-			api.PostMessage(ev.Channel, "Go away", nslack.NewPostMessageParameters())
-		}
+		HandleSlackCallback(client, eventsAPIEvent)
 	}
 
 	log.InfoF("Message: %+v", gatewayEvent)
