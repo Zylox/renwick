@@ -27,7 +27,7 @@ func Create() {
 
 	slackOauthSecretKey := utils.MustGetEnv(slack.OauthSecretsEnvKey)
 	oauthKey := slack.BasicSlackOauth{}
-	json.Unmarshal([]byte(secrets.MustGetSecret(awsSession, slackOauthSecretKey)), oauthKey)
+	json.Unmarshal([]byte(secrets.MustGetSecret(awsSession, slackOauthSecretKey)), &oauthKey)
 	log.InfoF("dont look: %s %s", oauthKey, secrets.MustGetSecret(awsSession, slackOauthSecretKey))
 	lambda.Start(bootStrapHandler(oauthKey))
 }
