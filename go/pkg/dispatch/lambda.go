@@ -5,10 +5,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	nslack "github.com/nlopes/slack"
-	"github.com/zylox/renwick/go/internal/pkg/aws/secrets"
-	"github.com/zylox/renwick/go/internal/pkg/log"
-	"github.com/zylox/renwick/go/internal/pkg/slack"
-	"github.com/zylox/renwick/go/internal/pkg/utils"
+	"github.com/zylox/renwick/go/pkg/aws/secrets"
+	"github.com/zylox/renwick/go/pkg/log"
+	"github.com/zylox/renwick/go/pkg/slack"
+	"github.com/zylox/renwick/go/pkg/utils"
 
 	"context"
 	"encoding/json"
