@@ -2,7 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Resources:
   CleverbotTopic:
-      Type 
+    Type: AWS::SNS::Topic
+    Properties: 
+      DisplayName: CleverbotTopic
+      TopicName: CleverbotTopic 
   GeneralLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -39,10 +42,28 @@ Resources:
       Environment:
         Variables:
             SLACK_OAUTH: renwick/slack/oauth
-            CLEVERBOT_KEY: renwick/cleverbot/apikey
+            CLEVERBOT_ARN: !Ref CleverbotTopic
       Events:
         SlackApi:
           Type: Api
           Properties: 
             Path: /slack_event
             Method: POST
+  Cleverbot:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda
+      Role: !GetAtt GeneralLambdaRole.Arn
+      ReservedConcurrentExecutions: 1
+      Runtime: go1.x
+      Timeout: 15
+      CodeUri: ./goarts/cmd/renwick/cleverbot
+      Environment:
+        Variables:
+            SLACK_OAUTH: renwick/slack/oauth
+            CLEVERBOT_KEY: renwick/cleverbot/apikey
+      Events:
+        CleverbotEvent:
+          Type: SNS
+          Properties: 
+            Topic: !Ref CleverbotTopic

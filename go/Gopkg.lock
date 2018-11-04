@@ -15,7 +15,7 @@
   version = "v1.6.0"
 
 [[projects]]
-  digest = "1:ab809ac29f46f559a5bb7595a81f9794968d27ec6edeefc73fe9f6635d72b070"
+  digest = "1:8e2e932776cca6b8e077b426cd11e7e2147219ce149866fbf807b4a81dbda646"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -48,6 +48,7 @@
     "private/protocol/rest",
     "private/protocol/xml/xmlutil",
     "service/secretsmanager",
+    "service/sns",
     "service/sts",
   ]
   pruneopts = "UT"
@@ -149,6 +150,7 @@
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/secretsmanager",
+    "github.com/aws/aws-sdk-go/service/sns",
     "github.com/justinian/dice",
     "github.com/nlopes/slack",
     "github.com/nlopes/slack/slackevents",

@@ -77,6 +77,10 @@ Resources:
                 Action:
                   - apigateway:*
                 Resource: '*'
+              - Effect: Allow
+                Action:
+                  - sns:*
+                Resource: '*'
                 
         
   PipelineRole:

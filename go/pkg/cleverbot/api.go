@@ -1,6 +1,11 @@
 package cleverbot
 
 import (
+	"encoding/json"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sns"
 	nslack "github.com/nlopes/slack"
 	"github.com/nlopes/slack/slackutilsx"
 	"github.com/ugjka/cleverbot-go"
@@ -18,14 +23,20 @@ type BotChatter struct {
 	session *cleverbot.Session
 }
 
+type PostHandler struct {
+	topicArn  string
+	snsClient *sns.SNS
+}
+
 func init() {
 	messagePostParameters = nslack.NewPostMessageParameters()
 	messagePostParameters.EscapeText = false
 }
 
-func NewCalbackHandler(secret utils.Secret) slack.SlackAppMessageEventHandler {
-	return &BotChatter{
-		secret: secret,
+func NewCalbackHandler(awsSession *session.Session, topicArn string) slack.SlackAppMessageEventHandler {
+	return PostHandler{
+		snsClient: sns.New(awsSession),
+		topicArn:  topicArn,
 	}
 }
 
@@ -36,43 +47,44 @@ func (chatter *BotChatter) initIfNeeded() {
 	}
 }
 
-// func Chat(client *nslack.Client, event slack.SlackAppMessageEvent) {
-// 	chatter.initIfNeeded()
-// 	log.InfoF("Entering Act for event %s", event.TimeStamp)
-// 	answer, err := chatter.session.Ask(event.Text)
-// 	if err != nil {
-// 		log.ErrorF("cleverbot.Act - Error when asking. Err: %s", err.Error())
-// 		client.PostMessage(event.Channel, "It is about time you leave.", nslack.NewPostMessageParameters())
-// 		return err
-// 	}
-// 	userID := slack.UserID{ID: event.User}
-
-// 	log.InfoF("cleverbot.Act - Sending mesasge: %s", slack.UserResponse(userID, slackutilsx.EscapeMessage(answer)))
-// 	client.PostMessage(event.Channel, slack.UserResponse(userID, slackutilsx.EscapeMessage(answer)), messagePostParameters)
-// 	return nil
-// }
-
-func (_ *BotChatter) Name() string {
-	return "CleverBot"
-}
-
-func (chatter *BotChatter) Is(_ slack.ClientContainer, event slack.SlackAppMessageEvent) bool {
-	return true
-}
-
-func (chatter *BotChatter) Act(clientContainer slack.ClientContainer, event slack.SlackAppMessageEvent) error {
+func (chatter *BotChatter) Chat(clientContainer slack.ClientContainer, event slack.SlackAppMessageEvent) error {
 	chatter.initIfNeeded()
 	client := clientContainer.GetClient()
-	log.InfoF("Entering Act for event %s", event.TimeStamp)
+	log.InfoF("Entering Chat for event %s", event.TimeStamp)
 	answer, err := chatter.session.Ask(event.Text)
 	if err != nil {
-		log.ErrorF("cleverbot.Act - Error when asking. Err: %s", err.Error())
+		log.ErrorF("cleverbot.Chat - Error when asking. Err: %s", err.Error())
 		client.PostMessage(event.Channel, "It is about time you leave.", nslack.NewPostMessageParameters())
 		return err
 	}
 	userID := slack.UserID{ID: event.User}
 
-	log.InfoF("cleverbot.Act - Sending mesasge: %s", slack.UserResponse(userID, slackutilsx.EscapeMessage(answer)))
+	log.InfoF("cleverbot.Chat - Sending mesasge: %s", slack.UserResponse(userID, slackutilsx.EscapeMessage(answer)))
 	client.PostMessage(event.Channel, slack.UserResponse(userID, slackutilsx.EscapeMessage(answer)), messagePostParameters)
 	return nil
+}
+
+func (_ PostHandler) Name() string {
+	return "CleverBot"
+}
+
+func (_ PostHandler) Is(_ slack.ClientContainer, event slack.SlackAppMessageEvent) bool {
+	return true
+}
+
+func (poster PostHandler) Act(clientContainer slack.ClientContainer, event slack.SlackAppMessageEvent) error {
+	msg, err := json.Marshal(event)
+	if err != nil {
+		log.ErrorF("cleverbot.Act - Failed to marshal message. Err: %s", err.Error())
+		return err
+	}
+	params := &sns.PublishInput{
+		Message:  aws.String(string(msg)),
+		TopicArn: aws.String(poster.topicArn),
+	}
+	_, err = poster.snsClient.Publish(params)
+	if err != nil {
+		log.ErrorF("cleverbot.Act - Failed to public message. Err: %s", err.Error())
+	}
+	return err
 }

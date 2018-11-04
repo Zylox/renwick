@@ -40,12 +40,7 @@ func Create() {
 		awsSession,
 		utils.MustGetEnv(slack.OauthSecretsEnvKey),
 	)
-
-	if cbsek := utils.GetEnv(cleverbot.CleverbotSecretEnvKey); cbsek != "" {
-		// cleverBotKey := secrets.MustGetSecret(awsSession, cbsek)
-		cleverBotKey := secrets.NewLazySecret(awsSession, cbsek)
-		fallbackHandler = cleverbot.NewCalbackHandler(cleverBotKey)
-	}
+	fallbackHandler = cleverbot.NewCalbackHandler(awsSession, utils.MustGetEnv(cleverbot.CleverbotArnKey))
 	oauthKey := slack.NewLazySlackOauth(slackOauthSecret)
 	lambda.Start(bootStrapHandler(oauthKey))
 }
@@ -86,19 +81,9 @@ func HandleSlackCallback(clientContainer slack.ClientContainer, event slackevent
 			}
 		}
 		if !handledAtleastOnce && fallbackHandler != nil {
-			log.InfoF("HandleSlackCallback - entering fallback callback")
+			log.InfoF("HandleSlackCallback - entering fallback callback %s", fallbackHandler.Name())
 			fallbackHandler.Act(clientContainer, same)
 		}
-
-		// triggeringUser, err := client.GetUserInfo(ev.User)
-		// var response string
-		// if err != nil {
-		// 	log.ErrorF("dispatch.HandleSlackCallback.AppMention - Could not lookup user name. Err: %+v", err)
-		// 	response = "Strange...i can't figure out who you are"
-		// } else {
-		// 	response = fmt.Sprintf("Go away %s", triggeringUser.Profile.DisplayName)
-		// }
-
 	}
 }
 
