@@ -1,11 +1,10 @@
 package dispatch
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws/session"
 	nslack "github.com/nlopes/slack"
 	"github.com/zylox/renwick/go/pkg/aws/secrets"
+	"github.com/zylox/renwick/go/pkg/dice"
 	"github.com/zylox/renwick/go/pkg/log"
 	"github.com/zylox/renwick/go/pkg/slack"
 	"github.com/zylox/renwick/go/pkg/utils"
@@ -18,6 +17,15 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/nlopes/slack/slackevents"
 )
+
+var appMentionCallBackHandlers []slack.SlackAppMessageEventHandler
+
+func init() {
+	appMentionCallBackHandlers = append(
+		appMentionCallBackHandlers,
+		dice.NewCallbackHandler(),
+	)
+}
 
 type GatewayProxyFn func(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)
 
@@ -50,27 +58,41 @@ func bootStrapHandler(oauthKey slack.SlackToken) GatewayProxyFn {
 	}
 }
 
-func HandleSlackCallback(client *nslack.Client, event slackevents.EventsAPIEvent) {
-	log.InfoF("EVENT PLES: %+v", event)
+func HandleSlackCallback(client *nslack.Client, event slackevents.EventsAPIEvent, authedUsers []string) {
+	botID := slack.UserID{ID: authedUsers[0]}
 	innerEvent := event.InnerEvent
 	switch ev := innerEvent.Data.(type) {
 	case *slackevents.AppMentionEvent:
-		triggeringUser, err := client.GetUserInfo(ev.User)
-		var response string
-		if err != nil {
-			log.ErrorF("dispatch.HandleSlackCallback.AppMention - Could not lookup user name. Err: %+v", err)
-			response = "Strange...i can't figure out who you are"
-		} else {
-			response = fmt.Sprintf("Go away %s", triggeringUser.Profile.DisplayName)
+		same := slack.SlackAppMessageEvent{
+			AppMentionEvent: *ev,
+			BotID:           botID,
+			Token:           event.Token,
+			TeamID:          event.TeamID,
 		}
-		client.PostMessage(ev.Channel, response, nslack.NewPostMessageParameters())
+
+		for _, handler := range appMentionCallBackHandlers {
+			if handler.Is(client, same) {
+				handler.Act(client, same)
+			}
+		}
+
+		// triggeringUser, err := client.GetUserInfo(ev.User)
+		// var response string
+		// if err != nil {
+		// 	log.ErrorF("dispatch.HandleSlackCallback.AppMention - Could not lookup user name. Err: %+v", err)
+		// 	response = "Strange...i can't figure out who you are"
+		// } else {
+		// 	response = fmt.Sprintf("Go away %s", triggeringUser.Profile.DisplayName)
+		// }
+
 	}
 }
 
 func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest, oauthKey slack.SlackToken) (events.APIGatewayProxyResponse, error) {
 	client := nslack.New(oauthKey.BotOauthKey())
+	rawE := json.RawMessage(gatewayEvent.Body)
 	eventsAPIEvent, err := slackevents.ParseEvent(
-		json.RawMessage(gatewayEvent.Body),
+		rawE,
 		slackevents.OptionVerifyToken(
 			&slackevents.TokenComparator{VerificationToken: oauthKey.VerificationToken()},
 		),
@@ -87,7 +109,12 @@ func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyReque
 			Body:       Challenge(gatewayEvent),
 		}, nil
 	} else if eventsAPIEvent.Type == slackevents.CallbackEvent {
-		HandleSlackCallback(client, eventsAPIEvent)
+		cbEvent := &slackevents.EventsAPICallbackEvent{}
+		err = json.Unmarshal(rawE, cbEvent)
+		if err != nil {
+			log.ErrorF("Failed to parse slack Outer event to get users: %+v", err)
+		}
+		HandleSlackCallback(client, eventsAPIEvent, cbEvent.AuthedUsers)
 	}
 
 	log.InfoF("Message: %+v", gatewayEvent)

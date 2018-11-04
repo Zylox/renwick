@@ -4,11 +4,15 @@ LAMBDAS = $(sort $(dir $(wildcard cmd/renwick/*/)))
 BUILD_DIR=artifacts
 
 
-all: ensure test $(LAMBDAS)
+all: ensure fmt test $(LAMBDAS)
 	@echo $@  $(LAMBDAS)
 
 ensure:
 	dep ensure
+
+fmt: 
+	go fmt ./...
+
 
 clean:
 	@[ ! -z "$(BUILD_DIR)" ] && rm -rf $(BUILD_DIR)
