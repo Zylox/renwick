@@ -31,6 +31,7 @@ func NewCalbackHandler(secret utils.Secret) slack.SlackAppMessageEventHandler {
 
 func (chatter *BotChatter) initIfNeeded() {
 	if chatter.session == nil {
+		log.InfoF("Cleverbot.initIfNeeded - Initing cleverbot session")
 		chatter.session = cleverbot.New(chatter.secret.MustGetSecret())
 	}
 }
