@@ -14,4 +14,5 @@ type SlackAppMessageEvent struct {
 type SlackAppMessageEventHandler interface {
 	Is(ClientContainer, SlackAppMessageEvent) bool
 	Act(ClientContainer, SlackAppMessageEvent) error
+	Name() string
 }

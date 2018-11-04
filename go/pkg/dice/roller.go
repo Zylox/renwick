@@ -19,6 +19,10 @@ const DiceRollCommandString = "roll me"
 
 type DiceRoller struct{}
 
+func (_ DiceRoller) Name() string {
+	return "DiceRoller"
+}
+
 func (d DiceRoller) Is(_ slack.ClientContainer, event slack.SlackAppMessageEvent) bool {
 	msg := slack.ParseSimpleCommand(event.BotID, event.Text)
 	return msg != "" && strings.HasPrefix(strings.ToLower(msg), DiceRollCommandString)

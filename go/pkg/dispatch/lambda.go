@@ -80,6 +80,7 @@ func HandleSlackCallback(clientContainer slack.ClientContainer, event slackevent
 		handledAtleastOnce := false
 		for _, handler := range appMentionCallBackHandlers {
 			if handler.Is(clientContainer, same) {
+				log.InfoF("main.HandleSlackCallback - Executing %s", handler.Name())
 				handledAtleastOnce = true
 				handler.Act(clientContainer, same)
 			}

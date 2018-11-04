@@ -51,6 +51,10 @@ func (chatter *BotChatter) initIfNeeded() {
 // 	return nil
 // }
 
+func (_ *BotChatter) Name() string {
+	return "CleverBot"
+}
+
 func (chatter *BotChatter) Is(_ slack.ClientContainer, event slack.SlackAppMessageEvent) bool {
 	return true
 }
