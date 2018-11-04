@@ -17,7 +17,7 @@ type BotChatter struct {
 
 func init() {
 	messagePostParameters = nslack.NewPostMessageParameters()
-	messagePostParameters.LinkNames = 1
+	messagePostParameters.EscapeText = false
 }
 
 func NewCalbackHandler(apiKey string) slack.SlackAppMessageEventHandler {
