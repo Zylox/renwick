@@ -28,7 +28,7 @@ func Create() {
 
 	cbsek := utils.MustGetEnv(CleverbotSecretEnvKey)
 	cleverBotSecret := secrets.NewLazySecret(awsSession, cbsek)
-	chatter := BotChatter{secret: cleverBotSecret}
+	chatter := NewBotChatter(cleverBotSecret)
 
 	oauthKey := slack.NewLazySlackOauth(slackOauthSecret)
 	clientContainer := slack.NewClientContainer(oauthKey)
@@ -37,13 +37,13 @@ func Create() {
 
 type SNSEventHandler func(ctx context.Context, snsEvent events.SNSEvent) error
 
-func bootStrapHandler(clientContainer slack.ClientContainer, chatter BotChatter) SNSEventHandler {
+func bootStrapHandler(clientContainer slack.ClientContainer, chatter *BotChatter) SNSEventHandler {
 	return func(ctx context.Context, snsEvent events.SNSEvent) error {
 		return handler(ctx, snsEvent, clientContainer, chatter)
 	}
 }
 
-func handler(ctx context.Context, snsEvent events.SNSEvent, clientContainer slack.ClientContainer, chatter BotChatter) error {
+func handler(ctx context.Context, snsEvent events.SNSEvent, clientContainer slack.ClientContainer, chatter *BotChatter) error {
 	for _, record := range snsEvent.Records {
 		snsRecord := record.SNS
 		slackEvent := slack.SlackAppMessageEvent{}

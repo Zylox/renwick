@@ -19,8 +19,8 @@ const CleverbotSecretEnvKey = "CLEVERBOT_KEY"
 var messagePostParameters nslack.PostMessageParameters
 
 type BotChatter struct {
-	secret  utils.Secret
-	session *cleverbot.Session
+	secret   utils.Secret
+	sessions map[string]*cleverbot.Session
 }
 
 type PostHandler struct {
@@ -33,6 +33,13 @@ func init() {
 	messagePostParameters.EscapeText = false
 }
 
+func NewBotChatter(secret utils.Secret) *BotChatter {
+	return &BotChatter{
+		secret:   secret,
+		sessions: make(map[string]*cleverbot.Session),
+	}
+}
+
 func NewCalbackHandler(awsSession *session.Session, topicArn string) slack.SlackAppMessageEventHandler {
 	return PostHandler{
 		snsClient: sns.New(awsSession),
@@ -40,18 +47,19 @@ func NewCalbackHandler(awsSession *session.Session, topicArn string) slack.Slack
 	}
 }
 
-func (chatter *BotChatter) initIfNeeded() {
-	if chatter.session == nil {
-		log.InfoF("Cleverbot.initIfNeeded - Initing cleverbot session")
-		chatter.session = cleverbot.New(chatter.secret.MustGetSecret())
+func (chatter *BotChatter) GetUserSession(userID slack.UserID) *cleverbot.Session {
+	if session, ok := chatter.sessions[userID.ID]; ok {
+		return session
 	}
+	chatter.sessions[userID.ID] = cleverbot.New(chatter.secret.MustGetSecret())
+	return chatter.sessions[userID.ID]
 }
 
 func (chatter *BotChatter) Chat(clientContainer slack.ClientContainer, event slack.SlackAppMessageEvent) error {
-	chatter.initIfNeeded()
+	session := chatter.GetUserSession(slack.UserID{ID: event.User})
 	client := clientContainer.GetClient()
 	log.InfoF("Entering Chat for event %s", event.TimeStamp)
-	answer, err := chatter.session.Ask(event.Text)
+	answer, err := session.Ask(event.Text)
 	if err != nil {
 		log.ErrorF("cleverbot.Chat - Error when asking. Err: %s", err.Error())
 		client.PostMessage(event.Channel, "It is about time you leave.", nslack.NewPostMessageParameters())
