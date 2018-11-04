@@ -29,8 +29,3 @@ package cleverbot
 
 // 	lambda.Start(bootStrapHandler(oauthKey))
 // }
-
-// if cbsek := utils.GetEnv(cleverbot.CleverbotSecretEnvKey); cbsek != "" {
-// 	cleverBotKey := secrets.MustGetSecret(awsSession, cbsek)
-// 	fallbackHandler = cleverbot.NewCalbackHandler(cleverBotKey)
-// }

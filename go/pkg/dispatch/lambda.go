@@ -3,6 +3,7 @@ package dispatch
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/zylox/renwick/go/pkg/aws/secrets"
+	"github.com/zylox/renwick/go/pkg/cleverbot"
 	"github.com/zylox/renwick/go/pkg/dice"
 	"github.com/zylox/renwick/go/pkg/log"
 	"github.com/zylox/renwick/go/pkg/slack"
@@ -39,6 +40,12 @@ func Create() {
 		awsSession,
 		utils.MustGetEnv(slack.OauthSecretsEnvKey),
 	)
+
+	if cbsek := utils.GetEnv(cleverbot.CleverbotSecretEnvKey); cbsek != "" {
+		// cleverBotKey := secrets.MustGetSecret(awsSession, cbsek)
+		cleverBotKey := secrets.NewLazySecret(awsSession, cbsek)
+		fallbackHandler = cleverbot.NewCalbackHandler(cleverBotKey)
+	}
 	oauthKey := slack.NewLazySlackOauth(slackOauthSecret)
 	lambda.Start(bootStrapHandler(oauthKey))
 }
