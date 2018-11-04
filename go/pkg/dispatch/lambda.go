@@ -51,6 +51,7 @@ func bootStrapHandler(oauthKey slack.SlackToken) GatewayProxyFn {
 }
 
 func HandleSlackCallback(client *nslack.Client, event slackevents.EventsAPIEvent) {
+	log.InfoF("EVENT PLES: %+v", event)
 	innerEvent := event.InnerEvent
 	switch ev := innerEvent.Data.(type) {
 	case *slackevents.AppMentionEvent:
