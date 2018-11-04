@@ -35,7 +35,6 @@ Resources:
     Properties:
       Handler: lambda
       Role: !GetAtt GeneralLambdaRole.Arn
-      ReservedConcurrentExecutions: 1
       Runtime: go1.x
       Timeout: 15
       CodeUri: ./goarts/cmd/renwick/dispatch #../../go/artifacts/cmd/dispatch/lambda
