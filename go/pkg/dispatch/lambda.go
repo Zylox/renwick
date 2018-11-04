@@ -40,7 +40,6 @@ func Create() {
 	slackOauthSecretKey := utils.MustGetEnv(slack.OauthSecretsEnvKey)
 	oauthKey := slack.BasicSlackOauth{}
 	json.Unmarshal([]byte(secrets.MustGetSecret(awsSession, slackOauthSecretKey)), &oauthKey)
-	log.InfoF("dont look: %s %s", oauthKey, secrets.MustGetSecret(awsSession, slackOauthSecretKey))
 
 	if cbsek := utils.GetEnv(cleverbot.CleverbotSecretEnvKey); cbsek != "" {
 		cleverBotKey := secrets.MustGetSecret(awsSession, cbsek)
