@@ -42,6 +42,7 @@ func (lso *LazySlackOauth) BotOauthKey() string {
 
 func (lso *LazySlackOauth) VerificationToken() string {
 	if lso.container == nil {
+		lso.container = &BasicSlackOauth{}
 		secretValue := lso.Secret.MustGetSecret()
 		err := json.Unmarshal([]byte(secretValue), lso.container)
 		if err != nil {
