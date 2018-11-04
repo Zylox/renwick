@@ -27,33 +27,33 @@ func init() {
 }
 
 func DebugF(format string, args ...interface{}) {
-	logrus.Debugf(format, args)
+	logrus.Debugf(format, args...)
 }
 
 func InfoF(format string, args ...interface{}) {
-	logrus.Infof(format, args)
+	logrus.Infof(format, args...)
 }
 
 func PrintF(format string, args ...interface{}) {
-	logrus.Printf(format, args)
+	logrus.Printf(format, args...)
 }
 
 func WarnF(format string, args ...interface{}) {
-	logrus.Warnf(format, args)
+	logrus.Warnf(format, args...)
 }
 
 func ErrorF(format string, args ...interface{}) {
-	logrus.Errorf(format, args)
+	logrus.Errorf(format, args...)
 }
 
 func TraceF(format string, args ...interface{}) {
-	logrus.Tracef(format, args)
+	logrus.Tracef(format, args...)
 }
 
 func FatalF(format string, args ...interface{}) {
-	logrus.Fatalf(format, args)
+	logrus.Fatalf(format, args...)
 }
 
 func PanicF(format string, args ...interface{}) {
-	logrus.Panicf(format, args)
+	logrus.Panicf(format, args...)
 }
