@@ -85,6 +85,7 @@ func HandleSlackCallback(client *nslack.Client, event slackevents.EventsAPIEvent
 			}
 		}
 		if !handledAtleastOnce && fallbackHandler != nil {
+			log.InfoF("HandleSlackCallback - entering fallback callback")
 			fallbackHandler.Act(client, same)
 		}
 

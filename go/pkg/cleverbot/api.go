@@ -18,6 +18,7 @@ type BotChatter struct {
 func init() {
 	messagePostParameters = nslack.NewPostMessageParameters()
 	messagePostParameters.LinkNames = 1
+	messagePostParameters.Parse = "full"
 }
 
 func NewCalbackHandler(apiKey string) slack.SlackAppMessageEventHandler {
@@ -40,6 +41,7 @@ func (chatter BotChatter) Act(client *nslack.Client, event slack.SlackAppMessage
 	}
 	userID := slack.UserID{ID: event.User}
 
+	log.InfoF("cleverbot.Act - Sending mesasge: %s", answer)
 	client.PostMessage(event.Channel, slack.UserResponse(userID, answer), messagePostParameters)
 	return nil
 }
