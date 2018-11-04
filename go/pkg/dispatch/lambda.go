@@ -2,6 +2,7 @@ package dispatch
 
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
+	nslack "github.com/nlopes/slack"
 	"github.com/zylox/renwick/go/internal/pkg/aws/secrets"
 	"github.com/zylox/renwick/go/internal/pkg/log"
 	"github.com/zylox/renwick/go/internal/pkg/slack"
@@ -39,7 +40,7 @@ func bootStrapHandler(oauthKey slack.SlackToken) GatewayProxyFn {
 }
 
 func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyRequest, oauthKey slack.SlackToken) (events.APIGatewayProxyResponse, error) {
-	// api := nslack.New(oauthKey.BotKey())
+	api := nslack.New(oauthKey.BotOauthKey())
 
 	eventsAPIEvent, err := slackevents.ParseEvent(
 		json.RawMessage(gatewayEvent.Body),
@@ -64,6 +65,12 @@ func HandleRequest(ctx context.Context, gatewayEvent events.APIGatewayProxyReque
 			StatusCode: http.StatusOK,
 			Body:       r.Challenge,
 		}, nil
+	} else if eventsAPIEvent.Type == slackevents.CallbackEvent {
+		innerEvent := eventsAPIEvent.InnerEvent
+		switch ev := innerEvent.Data.(type) {
+		case *slackevents.AppMentionEvent:
+			api.PostMessage(ev.Channel, "Go away", nslack.NewPostMessageParameters())
+		}
 	}
 
 	log.InfoF("Message: %+v", gatewayEvent)
