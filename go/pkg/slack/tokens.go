@@ -2,6 +2,7 @@ package slack
 
 import (
 	"encoding/json"
+
 	"github.com/zylox/renwick/go/pkg/aws/secrets"
 	"github.com/zylox/renwick/go/pkg/log"
 )
@@ -29,6 +30,7 @@ func NewLazySlackOauth(secret secrets.LazySecret) *LazySlackOauth {
 
 func (lso *LazySlackOauth) BotOauthKey() string {
 	if lso.container == nil {
+		lso.container = &BasicSlackOauth{}
 		secretValue := lso.Secret.MustGetSecret()
 		err := json.Unmarshal([]byte(secretValue), lso.container)
 		if err != nil {
