@@ -2,6 +2,7 @@ package cleverbot
 
 import (
 	nslack "github.com/nlopes/slack"
+	"github.com/nlopes/slack/slackutilsx"
 	"github.com/ugjka/cleverbot-go"
 	"github.com/zylox/renwick/go/pkg/log"
 	"github.com/zylox/renwick/go/pkg/slack"
@@ -40,7 +41,7 @@ func (chatter BotChatter) Act(client *nslack.Client, event slack.SlackAppMessage
 	}
 	userID := slack.UserID{ID: event.User}
 
-	log.InfoF("cleverbot.Act - Sending mesasge: %s", slack.UserResponse(userID, answer))
-	client.PostMessage(event.Channel, slack.UserResponse(userID, answer), messagePostParameters)
+	log.InfoF("cleverbot.Act - Sending mesasge: %s", slack.UserResponse(userID, slackutilsx.EscapeMessage(answer)))
+	client.PostMessage(event.Channel, slack.UserResponse(userID, slackutilsx.EscapeMessage(answer)), messagePostParameters)
 	return nil
 }
