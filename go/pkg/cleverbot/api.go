@@ -104,7 +104,10 @@ func (chatter *BotChatter) Chat(clientContainer slack.ClientContainer, event sla
 	userID := slack.UserID{ID: event.User}
 
 	log.InfoF("cleverbot.Chat - Sending mesasge: %s", slack.UserResponse(userID, slackutilsx.EscapeMessage(answer)))
-	client.PostMessage(event.Channel, slack.UserResponse(userID, slackutilsx.EscapeMessage(answer)), messagePostParameters)
+	client.PostMessage(
+		event.Channel,
+		slack.UserResponse(userID, slackutilsx.EscapeMessage(answer)),
+		slack.MaybeAddThread(messagePostParameters, event.ThreadTimeStamp))
 	return nil
 }
 

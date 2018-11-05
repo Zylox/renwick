@@ -40,6 +40,6 @@ func (d DiceRoller) Act(clientContainer slack.ClientContainer, event slack.Slack
 		return err
 	}
 	log.InfoF("dice.Act - User: %s,Roll: %s, Dice Reason: %s", event.User, result, reason)
-	client.PostMessage(event.Channel, result.String(), nslack.NewPostMessageParameters())
+	client.PostMessage(event.Channel, result.String(), slack.MaybeAddThread(nslack.NewPostMessageParameters(), event.ThreadTimeStamp))
 	return nil
 }

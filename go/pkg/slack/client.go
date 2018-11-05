@@ -25,3 +25,10 @@ func (lc *LazyClient) GetClient() *nslack.Client {
 	}
 	return lc.client
 }
+
+func MaybeAddThread(params nslack.PostMessageParameters, threadTS string) nslack.PostMessageParameters {
+	if threadTS != "" {
+		params.ThreadTimestamp = threadTS
+	}
+	return params
+}
