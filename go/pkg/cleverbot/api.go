@@ -97,9 +97,9 @@ func (chatter *BotChatter) Chat(clientContainer slack.ClientContainer, event sla
 	sessionUser := slack.UserID{ID: event.User}
 	if len(detectedUsers) >= 1 {
 		sessionUser = detectedUsers[0]
-		log.InfoF("full message:", event.Text)
-		log.InfoF("All detected users: ", detectedUsers)
-		log.InfoF("Joining session of user: ", sessionUser)
+		log.InfoF("full message: %s", event.Text)
+		log.InfoF("All detected users: %s", detectedUsers)
+		log.InfoF("Joining session of user: %s", sessionUser)
 	}
 	session := chatter.GetUserSession(sessionUser)
 	client := clientContainer.GetClient()
