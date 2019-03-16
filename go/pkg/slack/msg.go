@@ -25,6 +25,30 @@ func DetectUsers(msg string) []UserID {
 	return userIDs
 }
 
+func GetPositiveKarmaRecipients(msg string) []string {
+	re := regexp.MustCompile(`([^\s-+]*)\+\+`)
+	recipientMatches := re.FindAllStringSubmatch(msg, all)
+	recipients := []string{}
+	for _, recipient := range recipientMatches {
+		if recipient[1] != "" {
+			recipients = append(recipients, recipient[1])
+		}
+	}
+	return recipients
+}
+
+func GetNegativeKarmaRecipients(msg string) []string {
+	re := regexp.MustCompile(`([^\s-+]*)\-\-`)
+	recipientMatches := re.FindAllStringSubmatch(msg, all)
+	recipients := []string{}
+	for _, recipient := range recipientMatches {
+		if recipient[1] != "" {
+			recipients = append(recipients, recipient[1])
+		}
+	}
+	return recipients
+}
+
 func UserResponse(userID UserID, msg string) string {
 	return userID.ToLiteral() + ` ` + msg
 }
@@ -42,4 +66,8 @@ func ParseSimpleCommand(botID UserID, msg string) string {
 		return strings.TrimSpace(StripUserOnce(botID, msg))
 	}
 	return ""
+}
+
+func QualifiesForCommand(msg string, commandString string) bool {
+	return msg != "" && strings.HasPrefix(strings.ToLower(msg), commandString)
 }

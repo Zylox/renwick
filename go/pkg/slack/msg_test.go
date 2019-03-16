@@ -77,3 +77,47 @@ func TestParseSimpleCommand(t *testing.T) {
 		})
 	}
 }
+
+func TestGetPositiveKarmaRecipients(t *testing.T) {
+	type args struct {
+		msg string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "Basic",
+			args: args{"karma++"},
+			want: []string{"karma"},
+		},
+		{
+			name: "Two people",
+			args: args{"karma++ more++"},
+			want: []string{"karma", "more"},
+		},
+		{
+			name: "Allowed i guess",
+			args: args{"karma++more++"},
+			want: []string{"karma", "more"},
+		},
+		{
+			name: "Gives i guess",
+			args: args{"karma++--"},
+			want: []string{"karma"},
+		},
+		{
+			name: "No karma awarded",
+			args: args{"karma--++"},
+			want: []string{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := GetPositiveKarmaRecipients(tt.args.msg); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetPositiveKarmaRecipients() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
