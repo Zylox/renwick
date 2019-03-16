@@ -92,7 +92,14 @@ func (chatter *BotChatter) GetUserSession(userID slack.UserID) *cleverbot.Sessio
 }
 
 func (chatter *BotChatter) Chat(clientContainer slack.ClientContainer, event slack.SlackAppMessageEvent) error {
-	session := chatter.GetUserSession(slack.UserID{ID: event.User})
+	detectedUsers := slack.DetectUsers(event.Text)
+
+	sessionUser := slack.UserID{ID: event.User}
+	if len(detectedUsers) >= 1 {
+		sessionUser = detectedUsers[0]
+		log.InfoF("Joining session of user: ", sessionUser)
+	}
+	session := chatter.GetUserSession(sessionUser)
 	client := clientContainer.GetClient()
 	log.InfoF("Entering Chat for event %s", event.TimeStamp)
 	answer, err := session.Ask(event.Text)
